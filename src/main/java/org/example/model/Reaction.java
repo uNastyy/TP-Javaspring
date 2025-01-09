@@ -49,4 +49,5 @@ public class Reaction {
     public boolean getIsLike() {
         return isLike;
     }
+
 }
