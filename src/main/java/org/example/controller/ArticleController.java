@@ -3,10 +3,10 @@ package org.example.controller;
 import org.example.repository.ArticleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.example.model.Article;
+
+import java.time.LocalDate;
 
 @Controller // This means that this class is a Controller
 @RequestMapping(path="/article") // This means URL's start with /demo (after Application path)
@@ -22,5 +22,40 @@ public class ArticleController {
         return articleRepository.findAll();
     }
 
+    @GetMapping(path="/find")
+    public @ResponseBody Article findArticleById(Integer id) {
+        return articleRepository.findById(id).get();
+    }
 
+    @PostMapping(path="/add")
+    public @ResponseBody String addNewArticle (@RequestParam String author, @RequestParam String content) {
+        Article n = new Article();
+        n.setAuthor(author);
+        n.setContent(content);
+        n.setDate(LocalDate.now());
+        articleRepository.save(n);
+        return "Saved";
+    }
+
+    @DeleteMapping(path="/delete")
+    public @ResponseBody String deleteArticle(@RequestParam Integer id) {
+        if (!articleRepository.existsById(id)) {
+            return "Article not found";
+        }
+        articleRepository.deleteById(id);
+        return "Deleted";
+    }
+
+    @PutMapping(path="/update")
+    public @ResponseBody String updateArticle(@RequestParam Integer id, @RequestParam(required = false) String author, @RequestParam(required = false) String content) {
+        if (!articleRepository.existsById(id)) {
+            return "Article not found";
+        }
+        Article n = articleRepository.findById(id).get();
+
+        n.setAuthor(author != null ? author : n.getAuthor());
+        n.setContent(content != null ? content : n.getContent());
+        articleRepository.save(n);
+        return "Updated";
+    }
 }
