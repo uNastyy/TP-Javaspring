@@ -3,11 +3,7 @@ package org.example.controller;
 import org.example.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.example.repository.UserRepository;
 
 @Controller // This means that this class is a Controller
@@ -23,6 +19,9 @@ public class UserController {
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
 
+        if (userRepository.findByPseudo(pseudo) != null) {
+            return "Pseudo already exists";
+        }
         User n = new User();
         n.setPseudo(pseudo);
         n.setPassword(password);
@@ -37,19 +36,26 @@ public class UserController {
         return userRepository.findAll();
     }
 
-    @GetMapping(path="/delete")
+    @DeleteMapping(path="/delete")
     public @ResponseBody String deleteUser(@RequestParam Integer id) {
+        if (!userRepository.existsById(id)) {
+            return "User not found";
+        }
         userRepository.deleteById(id);
         return "Deleted";
     }
 
-    @GetMapping(path="/update")
-    public @ResponseBody String updateUser(@RequestParam Integer id, @RequestParam String pseudo, @RequestParam String password, @RequestParam String role) {
-        User n = new User();
+    @PutMapping(path="/update")
+    public @ResponseBody String updateUser(@RequestParam Integer id, @RequestParam(required = false) String pseudo, @RequestParam(required = false) String password, @RequestParam(required = false) String role) {
+        if (!userRepository.existsById(id)) {
+            return "User not found";
+        }
+        User n = userRepository.findById(id).get();
+
         n.setId(id);
-        n.setPseudo(pseudo);
-        n.setPassword(password);
-        n.setRole(role);
+        n.setPseudo(pseudo != null ? pseudo : n.getPseudo());
+        n.setPassword(password != null ? password : n.getPassword());
+        n.setRole(role != null ? role : n.getRole());
         userRepository.save(n);
         return "Updated";
     }
