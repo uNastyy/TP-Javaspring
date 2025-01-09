@@ -52,7 +52,6 @@ public class UserController {
         }
         User n = userRepository.findById(id).get();
 
-        n.setId(id);
         n.setPseudo(pseudo != null ? pseudo : n.getPseudo());
         n.setPassword(password != null ? password : n.getPassword());
         n.setRole(role != null ? role : n.getRole());
